@@ -93,30 +93,8 @@ src/
   - preferences: 偏好设置（JSON格式）
   - updatedAt: 更新时间
 
-## 腾讯云CloudBase 支持
-
-项目保留了对腾讯云CloudBase的支持，相关代码位于：
-- [src/services/cloudbaseService.js](file://d:\code\AITravelPlanner\ai_travel_planner\src\services\cloudbaseService.js)：腾讯云CloudBase服务封装（当前被注释）
-- [src/config/cloudbase.js](file://d:\code\AITravelPlanner\ai_travel_planner\src\config\cloudbase.js)：腾讯云CloudBase配置文件（可选创建）
-
-如需切换到腾讯云CloudBase，只需：
-1. 取消 [src/services/cloudbaseService.js](file://d:\code\AITravelPlanner\ai_travel_planner\src\services\cloudbaseService.js) 中的注释
-2. 在视图组件中将 `firebaseService` 替换为 `cloudbaseService`
-3. 配置腾讯云CloudBase环境变量
-
-## 开发计划
-
-- [x] 实现基础页面界面
-- [x] 集成 Firebase Authentication 身份验证
-- [x] 集成 Firebase Firestore 数据存储
-- [ ] 集成语音识别功能（科大讯飞 API）
-- [ ] 集成地图服务（高德地图 API）
-- [ ] 集成 AI 服务（阿里百炼 API）
-- [ ] 实现费用预算与管理功能
-- [ ] 实现行程详情展示功能
 
 ## 注意事项
 
 1. 本项目使用 Firebase 作为后端服务，需要自行创建 Firebase 项目并配置
-2. 项目保留了对腾讯云CloudBase的支持，可根据需要切换
-3. 语音识别、地图服务和AI服务需要接入相应的第三方API
+2. 语音识别、地图服务和AI服务需要接入相应的第三方API
