@@ -8,9 +8,9 @@ on:
 
 env:
   # 根据你的阿里云地区设置 registry 地址
-  REGISTRY: registry.cn-shanghai.aliyuncs.com
+  REGISTRY: crpi-gshmldmgiuobxgey.cn-shanghai.personal.cr.aliyuncs.com
   # 使用命名空间和镜像仓库名称
-  IMAGE_NAME: wwwusw-ai/ai-travel-planner
+  IMAGE_NAME: ai-travel-planner
 
 jobs:
   build-and-push:
@@ -34,7 +34,7 @@ jobs:
     - name: 登录阿里云容器镜像服务
       uses: aliyun/acr-login@v1
       with:
-        login-server: https://${{ env.REGISTRY }}
+        login-server: ${{ env.REGISTRY }}
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
 
