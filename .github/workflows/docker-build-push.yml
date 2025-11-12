@@ -3,8 +3,8 @@ name: 构建并推送 Docker 镜像
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
 
 env:
   # 根据你的阿里云地区设置 registry 地址
