@@ -155,3 +155,58 @@ Body:
 1. 本项目使用 Firebase 作为后端服务，需要自行创建 Firebase 项目并配置
 2. 语音识别、地图服务和AI服务需要接入相应的第三方API
 3. 项目使用 Vite 代理解决跨域问题，请确保配置正确
+
+## Docker 部署
+
+项目支持通过 Docker 进行部署，可以构建为镜像并在任何支持 Docker 的环境中运行。
+
+### 构建 Docker 镜像
+
+```bash
+# 克隆项目
+git clone <项目地址>
+
+# 进入项目目录
+cd ai_travel_planner
+
+# 构建 Docker 镜像
+docker build -t ai-travel-planner .
+```
+
+### 运行容器
+
+```bash
+docker run -d -p 8080:80 --name ai-travel-planner ai-travel-planner
+```
+
+访问 `http://localhost:8080` 查看应用。
+
+## GitHub Actions 自动化部署
+
+项目配置了 GitHub Actions 工作流，可以自动构建 Docker 镜像并推送到阿里云容器镜像仓库。
+
+### 配置 Secrets
+
+在 GitHub 仓库的 Settings > Secrets and variables > Actions 中添加以下 secrets：
+
+- `ACR_USERNAME`: 阿里云容器镜像服务用户名
+- `ACR_PASSWORD`: 阿里云容器镜像服务密码
+- `ACR_IMAGE_NAME`: 镜像名称（格式：命名空间/镜像名）
+
+### 工作流说明
+
+当代码推送到 `main` 分支时，GitHub Actions 会自动执行以下操作：
+
+1. 检出代码
+2. 安装依赖并构建项目
+3. 登录阿里云容器镜像服务
+4. 构建 Docker 镜像并打标签
+5. 推送镜像到阿里云容器镜像仓库
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request 来改进这个项目。
+
+## 许可证
+
+[MIT](LICENSE)

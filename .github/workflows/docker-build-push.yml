@@ -1,0 +1,49 @@
+name: 构建并推送 Docker 镜像
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  # 根据你的阿里云地区设置 registry 地址
+  REGISTRY: registry.cn-shanghai.aliyuncs.com
+  # 使用命名空间和镜像仓库名称
+  IMAGE_NAME: wwwusw-ai/ai-travel-planner
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v3
+
+    - name: 设置 Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: 安装依赖
+      run: npm ci
+
+    - name: 构建项目
+      run: npm run build
+
+    - name: 登录阿里云容器镜像服务
+      uses: aliyun/acr-login@v1
+      with:
+        login-server: https://${{ env.REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: 构建 Docker 镜像
+      run: |
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+    - name: 推送 Docker 镜像
+      run: |
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
