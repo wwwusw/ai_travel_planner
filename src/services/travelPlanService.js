@@ -91,7 +91,10 @@ export async function createTravelPlan(travelRequest, apiKey) {
    - 其他费用：
    - 总计：
 
-请确保规划内容详细、实用且满足用户的需求。`;
+请确保规划内容详细、实用且满足用户的需求。
+请在最后单独换行并按照以下格式返回旅行规划中的所有旅游景点：
+
+旅行路线：xxx->xxx->xxx->xxx`;
   } else {
     // 手动输入模式 - 使用结构化参数
     prompt = `你是一个专业的旅行规划师AI助手。请根据以下信息为用户生成详细的旅行规划：
@@ -134,7 +137,10 @@ export async function createTravelPlan(travelRequest, apiKey) {
    - 其他费用：
    - 总计：
 
-请确保规划内容详细、实用且符合用户预算。`;
+请确保规划内容详细、实用且符合用户预算。
+请在最后单独换行并按照以下格式返回旅行规划中的所有旅游景点：
+
+旅行路线：xxx->xxx->xxx->xxx`;
   }
 
   try {

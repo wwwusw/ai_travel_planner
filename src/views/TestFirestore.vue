@@ -1,311 +1,154 @@
 <template>
-  <div class="test-container">
-    <h1>Firebase Firestore 测试</h1>
-    
+  <div class="test-firestore">
+    <h1>测试页面</h1>
     <div class="test-section">
-      <h2>配置检查</h2>
-      <div v-if="!isConfigured">
-        <p>检测到Firebase配置可能存在问题</p>
-        <router-link to="/firebase-config">查看配置指南</router-link>
-      </div>
-      <div v-else>
-        <p>Firebase配置正常</p>
-      </div>
-    </div>
-    
-    <div class="test-section">
-      <h2>用户认证测试</h2>
-      <div v-if="!user">
-        <p>当前未登录</p>
-        <button @click="testLogin">测试登录</button>
-        <button @click="testRegister">测试注册</button>
-      </div>
-      <div v-else>
-        <p>当前用户: {{ user.email }}</p>
-        <button @click="testLogout">测试登出</button>
-      </div>
-    </div>
-
-    <div class="test-section">
-      <h2>Firestore 数据测试</h2>
-      <div>
-        <button @click="testCreate" :disabled="!user || !isConfigured">创建文档</button>
-        <button @click="testRead" :disabled="!user || !isConfigured">读取文档</button>
-        <button @click="testUpdate" :disabled="!user || !isConfigured">更新文档</button>
-        <button @click="testDelete" :disabled="!user || !isConfigured">删除文档</button>
+      <h2>路线规划测试</h2>
+      <div class="input-section">
+        <textarea 
+          v-model="testPlan" 
+          rows="6" 
+          placeholder="输入测试用的旅行计划"
+          class="plan-input"
+        ></textarea>
+        <div class="button-group">
+          <button @click="testRouteExtraction" class="test-btn">测试路线提取</button>
+          <button @click="testRouteDisplay" class="test-btn">测试路线展示</button>
+          <button @click="testSimpleRoute" class="test-btn">测试简单路线</button>
+        </div>
       </div>
       
       <div class="result-section">
-        <h3>测试结果:</h3>
-        <pre>{{ testResult }}</pre>
+        <h3>提取结果:</h3>
+        <div v-if="extractedRoute.length > 0" class="route-display">
+          <ul>
+            <li v-for="(place, index) in extractedRoute" :key="index">
+              {{ index + 1 }}. {{ place }}
+            </li>
+          </ul>
+        </div>
+        <div v-else class="no-route">
+          未提取到路线信息
+        </div>
+      </div>
+    </div>
+    
+    <div class="map-section">
+      <h2>地图展示</h2>
+      <div class="map-container">
+        <MapComponent 
+          ref="mapComponent"
+          :itinerary="routeItinerary"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { authService, dataService } from '../services/firebaseService'
+import { ref } from 'vue'
+import MapComponent from '../components/MapComponent.vue'
+import { extractTravelRoute } from '../utils/itineraryParser'
 
-const user = ref(null)
-const testResult = ref('')
-const isConfigured = ref(true)
+const testPlan = ref(`旅行路线：夫子庙->老门东->中山陵->明孝陵->南京博物院`)
 
-// 检查Firebase配置
-onMounted(() => {
-  try {
-    // 检查必要的环境变量是否存在
-    const requiredEnvVars = [
-      'VITE_FIREBASE_API_KEY',
-      'VITE_FIREBASE_AUTH_DOMAIN',
-      'VITE_FIREBASE_PROJECT_ID'
-    ]
-    
-    for (const envVar of requiredEnvVars) {
-      if (!import.meta.env[envVar]) {
-        isConfigured.value = false
-        testResult.value += `缺少环境变量: ${envVar}\n`
-      }
-    }
-    
-    if (isConfigured.value) {
-      testResult.value += 'Firebase配置检查通过\n'
-    }
-  } catch (error) {
-    isConfigured.value = false
-    testResult.value += `配置检查失败: ${error.message}\n`
-  }
+const extractedRoute = ref([])
+const routeItinerary = ref([])
+const mapComponent = ref(null)
+
+// 测试路线提取功能
+const testRouteExtraction = () => {
+  extractedRoute.value = extractTravelRoute(testPlan.value)
+  console.log('提取的路线:', extractedRoute.value)
+}
+
+// 测试路线展示功能
+const testRouteDisplay = () => {
+  const route = extractTravelRoute(testPlan.value)
+  extractedRoute.value = route
   
-  // 监听认证状态
-  try {
-    authService.onAuthStateChanged(u => {
-      user.value = u
-      if (u) {
-        testResult.value += `用户已登录: ${u.email}\n`
-      } else {
-        testResult.value += '用户未登录\n'
-      }
-    })
-  } catch (error) {
-    testResult.value += `认证监听失败: ${error.message}\n`
-  }
-})
-
-// 测试登录
-const testLogin = async () => {
-  try {
-    const email = prompt('请输入邮箱:')
-    const password = prompt('请输入密码:')
-    
-    if (!email || !password) {
-      testResult.value += '邮箱或密码不能为空\n'
-      return
-    }
-    
-    testResult.value += '正在登录...\n'
-    const result = await authService.login(email, password)
-    
-    if (result.success) {
-      testResult.value += `登录成功: ${result.user.email}\n`
-    } else {
-      testResult.value += `登录失败: ${result.error}\n`
-    }
-  } catch (error) {
-    testResult.value += `登录异常: ${error.message}\n`
+  if (route.length > 0) {
+    routeItinerary.value = route;
   }
 }
 
-// 测试注册
-const testRegister = async () => {
-  try {
-    const email = prompt('请输入邮箱:')
-    const password = prompt('请输入密码:')
-    
-    if (!email || !password) {
-      testResult.value += '邮箱或密码不能为空\n'
-      return
-    }
-    
-    testResult.value += '正在注册...\n'
-    const result = await authService.register(email, password)
-    
-    if (result.success) {
-      testResult.value += `注册成功: ${result.user.email}\n`
-    } else {
-      testResult.value += `注册失败: ${result.error}\n`
-    }
-  } catch (error) {
-    testResult.value += `注册异常: ${error.message}\n`
-  }
-}
-
-// 测试登出
-const testLogout = async () => {
-  try {
-    testResult.value += '正在登出...\n'
-    const result = await authService.logout()
-    
-    if (result.success) {
-      testResult.value += '登出成功\n'
-    } else {
-      testResult.value += `登出失败: ${result.error}\n`
-    }
-  } catch (error) {
-    testResult.value += `登出异常: ${error.message}\n`
-  }
-}
-
-// 测试创建文档
-const testCreate = async () => {
-  try {
-    testResult.value += '正在创建文档...\n'
-    const testData = {
-      title: '测试文档',
-      content: '这是一个测试文档',
-      createdAt: new Date()
-    }
-    
-    const result = await dataService.createTravelPlan(user.value.uid, testData)
-    
-    if (result.success) {
-      testResult.value += `文档创建成功: ${result.plan.id}\n`
-    } else {
-      testResult.value += `文档创建失败: ${result.error}\n`
-    }
-  } catch (error) {
-    testResult.value += `创建文档异常: ${error.message}\n`
-  }
-}
-
-// 测试读取文档
-const testRead = async () => {
-  try {
-    testResult.value += '正在读取文档...\n'
-    const result = await dataService.getUserTravelPlans(user.value.uid)
-    
-    if (result.success) {
-      testResult.value += `文档读取成功，共找到 ${result.plans.length} 个文档\n`
-      if (result.plans.length > 0) {
-        testResult.value += `第一个文档ID: ${result.plans[0].id}\n`
-      }
-    } else {
-      testResult.value += `文档读取失败: ${result.error}\n`
-    }
-  } catch (error) {
-    testResult.value += `读取文档异常: ${error.message}\n`
-  }
-}
-
-// 测试更新文档
-const testUpdate = async () => {
-  try {
-    testResult.value += '正在更新文档...\n'
-    
-    // 先获取一个文档ID
-    const readResult = await dataService.getUserTravelPlans(user.value.uid)
-    
-    if (readResult.success && readResult.plans.length > 0) {
-      const planId = readResult.plans[0].id
-      const updateData = {
-        title: '更新后的测试文档',
-        updatedAt: new Date()
-      }
-      
-      const result = await dataService.updateTravelPlan(planId, updateData)
-      
-      if (result.success) {
-        testResult.value += `文档更新成功: ${planId}\n`
-      } else {
-        testResult.value += `文档更新失败: ${result.error}\n`
-      }
-    } else {
-      testResult.value += '没有可更新的文档\n'
-    }
-  } catch (error) {
-    testResult.value += `更新文档异常: ${error.message}\n`
-  }
-}
-
-// 测试删除文档
-const testDelete = async () => {
-  try {
-    testResult.value += '正在删除文档...\n'
-    
-    // 先获取一个文档ID
-    const readResult = await dataService.getUserTravelPlans(user.value.uid)
-    
-    if (readResult.success && readResult.plans.length > 0) {
-      const planId = readResult.plans[0].id
-      
-      const result = await dataService.deleteTravelPlan(planId)
-      
-      if (result.success) {
-        testResult.value += `文档删除成功: ${planId}\n`
-      } else {
-        testResult.value += `文档删除失败: ${result.error}\n`
-      }
-    } else {
-      testResult.value += '没有可删除的文档\n'
-    }
-  } catch (error) {
-    testResult.value += `删除文档异常: ${error.message}\n`
-  }
+// 测试简单路线
+const testSimpleRoute = () => {
+  testPlan.value = `旅行路线：夫子庙->老门东->中山陵->明孝陵->南京博物院->颐和路->总统府->侵华日军南京大屠杀遇难同胞纪念馆->鸡鸣寺`
+  testRouteDisplay()
 }
 </script>
 
 <style scoped>
-.test-container {
-  max-width: 800px;
-  margin: 0 auto;
+.test-firestore {
   padding: 20px;
-  font-family: Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .test-section {
   margin-bottom: 30px;
-  padding: 20px;
+}
+
+.input-section {
+  margin-bottom: 20px;
+}
+
+.plan-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-radius: 4px;
+  font-family: inherit;
 }
 
-.test-section h2 {
-  margin-top: 0;
+.button-group {
+  display: flex;
+  gap: 10px;
 }
 
-button {
-  padding: 8px 16px;
-  margin: 5px;
+.test-btn {
   background-color: #409eff;
   color: white;
   border: none;
+  padding: 10px 15px;
   border-radius: 4px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
-button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.test-btn:hover {
+  background-color: #337ecc;
 }
 
 .result-section {
-  margin-top: 20px;
   padding: 15px;
-  background-color: #f5f5f5;
+  border: 1px solid #eee;
   border-radius: 4px;
+  background-color: #f9f9f9;
 }
 
-.result-section pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  margin: 0;
+.route-display ul {
+  padding-left: 20px;
 }
 
-a {
-  color: #409eff;
-  text-decoration: none;
+.route-display li {
+  margin-bottom: 5px;
 }
 
-a:hover {
-  text-decoration: underline;
+.no-route {
+  color: #999;
+  font-style: italic;
+}
+
+.map-section {
+  margin-top: 30px;
+}
+
+.map-container {
+  height: 500px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
 }
 </style>

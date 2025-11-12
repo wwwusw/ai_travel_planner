@@ -42,7 +42,6 @@ const mapId = ref('amap-container-' + Date.now())
 let AMapInstance = null
 let isMapDestroyed = false
 let driving = null // 路线规划对象
-let dayMarkers = [] // 每日景点标记
 let polyline = null // 路线连线
 
 // 初始化地图
@@ -132,6 +131,16 @@ const initMap = async () => {
           map: map.value,
           panel: null // 不显示路线面板
         })
+        
+        // 监听路线规划完成事件
+        driving.on('complete', function(result) {
+          console.log('路线规划完成:', result);
+        });
+        
+        // 监听路线规划错误事件
+        driving.on('error', function(error) {
+          console.error('路线规划出错:', error);
+        });
       }
 
       // 添加初始标记（如果是默认位置）
@@ -284,80 +293,56 @@ const updateDestination = (destination) => {
 
 // 解析行程数据并在地图上显示
 const displayItinerary = async (itineraryData) => {
-  if (!map.value || !geocoder.value || !driving || !itineraryData || itineraryData.length === 0) {
-    console.warn('地图、地理编码服务或路线规划服务未初始化，或行程数据为空')
+  if (!map.value || !driving || !itineraryData || itineraryData.length === 0) {
+    console.warn('地图或路线规划服务未初始化，或行程数据为空')
     return
   }
 
   try {
-    // 清除之前的标记和路线
-    clearItinerary()
-
-    // 存储所有景点的坐标
-    const waypoints = []
-    
-    // 遍历每日行程
-    for (let i = 0; i < itineraryData.length; i++) {
-      const day = itineraryData[i]
-      const dayNumber = day.day
-      const places = day.places
-      
-      // 为每日的每个景点添加标记
-      for (let j = 0; j < places.length; j++) {
-        const place = places[j]
-        const result = await new Promise((resolve) => {
-          geocoder.value.getLocation(place, (status, result) => {
-            resolve({status, result, day: dayNumber, place})
-          })
-        })
-        
-        if (result.status === 'complete' && result.result.geocodes.length) {
-          const geocode = result.result.geocodes[0]
-          const location = geocode.location
-          
-          // 添加标记
-          const marker = new AMapInstance.Marker({
-            position: [location.lng, location.lat],
-            title: `${result.place} (第${result.day}天)`,
-            label: {
-              content: `${result.day}-${j+1}`,
-              offset: new AMapInstance.Pixel(0, 0)
-            }
-          })
-          
-          marker.setMap(map.value)
-          dayMarkers.push(marker)
-          waypoints.push([location.lng, location.lat])
-        }
-      }
+    // 清除之前的路线
+    if (driving) {
+      driving.clear()
     }
+
+    // 处理行程数据（现在只包含地点的数组）
+    let placesToProcess = [];
+    
+    // itineraryData 应该是一个地点数组
+    if (Array.isArray(itineraryData) && itineraryData.length > 0) {
+      placesToProcess = [...itineraryData];
+    }
+    console.log('处理行程数据:', placesToProcess);
+    // 构造路径规划参数
+    const points = placesToProcess.map((place, index) => {
+      return {
+        keyword: place,
+        city: props.destination || '全国'
+      }
+    });
     
     // 如果有至少两个点，则规划路线
-    if (waypoints.length >= 2) {
-      // 使用路线规划服务
-      driving.search(waypoints[0], waypoints[waypoints.length - 1], {waypoints: waypoints.slice(1, -1)})
-    } else if (waypoints.length === 1) {
+    if (points.length >= 2) {
+      // 使用高德地图API进行路径规划
+      // 根据高德地图API文档，points应该包含所有点（起点、终点和途经点）
+      console.log('路径规划参数:', points);
+      driving.search(points, (status, result) => {
+        if (status === 'complete') {
+          console.log('路线规划成功:', result);
+        } else {
+          console.error('路线规划失败:', status, result);
+        }
+      });
+    } else if (points.length === 1) {
       // 只有一个点，居中显示
-      map.value.setCenter(waypoints[0])
-      map.value.setZoom(14)
+      console.warn('路径规划需要至少两个点，当前只有一个点:', points[0]);
     }
   } catch (error) {
-    console.error('显示行程时出错:', error)
+    console.error('路径规划时出错:', error)
   }
 }
 
-// 清除行程标记和路线
+// 清除路线
 const clearItinerary = () => {
-  // 清除标记
-  dayMarkers.forEach(marker => {
-    try {
-      marker.setMap(null)
-    } catch (e) {
-      console.warn('移除标记时出错:', e)
-    }
-  })
-  dayMarkers = []
-  
   // 清除路线
   if (driving) {
     driving.clear()

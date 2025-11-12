@@ -190,7 +190,7 @@ import { useRouter } from 'vue-router'
 import { authService, dataService } from '../services/firebaseService'
 import { createTravelPlan } from '../services/travelPlanService'
 import MapComponent from '../components/MapComponent.vue'
-import { parseItinerary } from '../utils/itineraryParser'
+import { parseItinerary, extractTravelRoute } from '../utils/itineraryParser'
 import { initSpeechRecognition, endSpeechRecognition } from '../services/iflytekService'
 
 const router = useRouter()
@@ -328,6 +328,14 @@ const handleGenerateTravelPlan = async () => {
     const parsedItinerary = parseItinerary(streamOutput.value)
     console.log('解析后的行程数据:', parsedItinerary)
     itineraryData.value = parsedItinerary
+    
+    // 提取旅行路线并在地图上显示
+    const travelRoute = extractTravelRoute(streamOutput.value)
+    if (travelRoute.length > 0) {
+      console.log('提取的旅行路线:', travelRoute)
+      // 直接使用地点数组
+      itineraryData.value = travelRoute
+    }
     
     isLoading.value = false
   } catch (error) {

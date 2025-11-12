@@ -64,6 +64,50 @@ export function parseItinerary(planText) {
 }
 
 /**
+ * 从大模型输出中提取旅行路线
+ * @param {string} planText - 大模型返回的行程文本
+ * @returns {Array} 提取的景点列表
+ */
+export function extractTravelRoute(planText) {
+  if (!planText) return []
+  
+  // 按行分割文本
+  const lines = planText.split('\n')
+  
+  // 从最后一行开始查找旅行路线
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i].trim()
+    
+    // 查找以"旅行路线："开头的行
+    const routeMatch = line.match(/^[-\s]*旅行路线[：:](.*)/)
+    if (routeMatch) {
+      // 提取路线部分
+      const routeText = routeMatch[1].trim()
+      
+      // 按箭头分割景点
+      const places = routeText.split(/->|→/).map(place => place.trim()).filter(place => place.length > 0)
+      
+      return places
+    }
+  }
+  
+  // 如果没找到标准格式，尝试查找包含箭头的行
+  for (let i = lines.length - 1; i >= 0; i--) {
+    const line = lines[i].trim()
+    
+    // 查找包含箭头的行
+    if (line.includes('->') || line.includes('→')) {
+      // 提取路线部分
+      const places = line.split(/->|→/).map(place => place.trim()).filter(place => place.length > 0)
+      
+      return places
+    }
+  }
+  
+  return []
+}
+
+/**
  * 从文本中提取多个景点名称
  * @param {string} text - 包含景点描述的文本
  * @returns {Array} 提取的景点名称数组

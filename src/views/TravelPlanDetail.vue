@@ -61,7 +61,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { authService, dataService } from '../services/firebaseService'
 import MapComponent from '../components/MapComponent.vue'
-import { parseItinerary } from '../utils/itineraryParser'
+import { parseItinerary, extractTravelRoute } from '../utils/itineraryParser'
 
 const router = useRouter()
 const route = useRoute()
@@ -95,9 +95,17 @@ const loadTravelPlan = async (planId) => {
     }
     
     // 解析行程并在地图上显示
-    const parsedItinerary = parseItinerary(plan.rawAiResponse)
-    console.log('解析后的行程数据:', parsedItinerary)
-    itineraryData.value = parsedItinerary
+    const travelRoute = extractTravelRoute(plan.rawAiResponse)
+    if (travelRoute.length > 0) {
+      console.log('提取的旅行路线:', travelRoute)
+      // 直接使用地点数组
+      itineraryData.value = travelRoute
+    } else {
+      // 如果没有找到路线，则使用旧的解析方法
+      const parsedItinerary = parseItinerary(plan.rawAiResponse)
+      console.log('解析后的行程数据:', parsedItinerary)
+      itineraryData.value = parsedItinerary
+    }
   } else {
     error.value = '加载旅行计划失败: ' + (errorMsg || '未知错误')
   }
