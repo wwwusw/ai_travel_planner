@@ -4,9 +4,9 @@ import CryptoJS from 'crypto-js'
 class IFlytekSpeechRecognizer {
   constructor() {
     // 从环境变量获取配置信息
-    this.APPID = import.meta.env.VITE_IFLYTEK_APPID
-    this.APISecret = import.meta.env.VITE_IFLYTEK_APISECRET
-    this.APIKey = import.meta.env.VITE_IFLYTEK_APIKEY
+    this.APPID = import.meta.env.VITE_IFLYTEK_APP_ID
+    this.APISecret = import.meta.env.VITE_IFLYTEK_API_SECRET
+    this.APIKey = import.meta.env.VITE_IFLYTEK_API_KEY
     
     this.host = 'wss://iat-api.xfyun.cn/v2/iat'
     this.socket = null

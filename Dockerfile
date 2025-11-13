@@ -7,8 +7,8 @@ WORKDIR /app
 # 复制 package.json 和 package-lock.json（如果存在）
 COPY package*.json ./
 
-# 安装依赖
-RUN npm ci --only=production
+# 安装依赖，使用--platform参数解决rollup问题
+RUN npm ci --platform=linux --arch=x64
 
 # 复制项目文件
 COPY . .

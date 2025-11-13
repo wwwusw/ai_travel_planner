@@ -9,8 +9,9 @@ on:
 env:
   # 根据你的阿里云地区设置 registry 地址
   REGISTRY: crpi-gshmldmgiuobxgey.cn-shanghai.personal.cr.aliyuncs.com
-  # 使用命名空间和镜像仓库名称
-  IMAGE_NAME: ai-travel-planner
+  # 使用正确的命名空间和镜像仓库名称
+  NAMESPACE: wwwusw-ai
+  IMAGE_NAME: ai-project
 
 jobs:
   build-and-push:
@@ -40,10 +41,10 @@ jobs:
 
     - name: 构建 Docker 镜像
       run: |
-        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
-        docker tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        docker build -t ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker tag ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
 
     - name: 推送 Docker 镜像
       run: |
-        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        docker push ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        docker push ${{ env.REGISTRY }}/${{ env.NAMESPACE }}/${{ env.IMAGE_NAME }}:latest

@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  ai-travel-planner:
+    image: crpi-gshmldmgiuobxgey.cn-shanghai.personal.cr.aliyuncs.com/wwwusw-ai/ai-project:latest
+    container_name: ai-travel-planner
+    ports:
+      - "8080:80"
+    environment:
+      # Firebase配置
+      - VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY}
+      - VITE_FIREBASE_AUTH_DOMAIN=${VITE_FIREBASE_AUTH_DOMAIN}
+      - VITE_FIREBASE_PROJECT_ID=${VITE_FIREBASE_PROJECT_ID}
+      - VITE_FIREBASE_STORAGE_BUCKET=${VITE_FIREBASE_STORAGE_BUCKET}
+      - VITE_FIREBASE_MESSAGING_SENDER_ID=${VITE_FIREBASE_MESSAGING_SENDER_ID}
+      - VITE_FIREBASE_APP_ID=${VITE_FIREBASE_APP_ID}
+      
+      # 阿里百炼平台配置
+      - VITE_ALIYUN_API_KEY=${VITE_ALIYUN_API_KEY}
+      
+      # 高德地图API配置
+      - VITE_AMAP_API_KEY=${VITE_AMAP_API_KEY}
+      - VITE_AMAP_SECURITY_CODE=${VITE_AMAP_SECURITY_CODE}
+      
+      # 讯飞星火大模型配置
+      - VITE_IFLYTEK_APP_ID=${VITE_IFLYTEK_APP_ID}
+      - VITE_IFLYTEK_API_KEY=${VITE_IFLYTEK_API_KEY}
+      - VITE_IFLYTEK_API_SECRET=${VITE_IFLYTEK_API_SECRET}
+    env_file:
+      - .env
