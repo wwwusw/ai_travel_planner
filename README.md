@@ -40,7 +40,7 @@
    ```
 
 3. 配置环境变量
-   复制 [.env.example](file:///d%3A/code/AITravelPlanner/ai_travel_planner/.env.example) 文件并重命名为 `.env`，填写相应的配置信息
+   复制 [.env.example](.env.example) 文件并重命名为 `.env`，填写相应的配置信息
 
 4. 启动开发服务器
    ```
@@ -49,7 +49,7 @@
 
 ## Docker 部署
 
-详细信息请参考 [Docker 部署指南](file:///d%3A/code/AITravelPlanner/ai_travel_planner/README.Docker.md)
+如果您希望通过 Docker 快速部署应用，请参考详细的 [Docker 部署指南](README.Docker.md)。
 
 ## 目录结构
 
@@ -100,7 +100,7 @@ VITE_AMAP_SECURITY_CODE=
    - 高德地图：[高德开放平台](https://lbs.amap.com/)
 
 2. 配置Firebase
-   参考 [Firebase配置指南](file:///d%3A/code/AITravelPlanner/ai_travel_planner/src/views/FirebaseConfigGuide.vue)
+   参考 [Firebase配置指南](src/views/FirebaseConfigGuide.vue)
 
 3. 配置讯飞星火大模型
    在 `.env` 文件中填入申请的API信息
@@ -109,4 +109,4 @@ VITE_AMAP_SECURITY_CODE=
 
 - 保护好各平台的API密钥，不要泄露给他人
 - 项目中的API密钥应仅用于开发测试，请勿用于生产环境
-- 如需生产部署，请参考Docker部署指南
+- 如需生产部署，请参考 [Docker 部署指南](README.Docker.md)
